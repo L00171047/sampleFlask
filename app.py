@@ -30,9 +30,11 @@ def decorator(takes_a_function):
 @decorator
 def home():
     # return "Hello, Flask!"
+    data={"List of users":[{"user1":"Ankhush","User2":"Ganesh"}]}
     return jsonify(
                     message="Valid token and Verified",
                     # category="error",
-                    status=200
+                    status=200,
+                    data=data
                 )
 
