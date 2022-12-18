@@ -1,7 +1,10 @@
-# from flask import Flask
 from flask import Flask,request, jsonify, make_response
 import cognitojwt
 from functools import wraps
+from pymongo import MongoClient
+
+DB_URL= "mongodb+srv://admin:admin@cluster0.oefeycn.mongodb.net/?retryWrites=true&w=majority"
+	# checkov:skip=CKV_SECRET_4: ADD REASON
 
 
 app = Flask(__name__)
@@ -21,13 +24,40 @@ def decorator(takes_a_function):
     return wrapper
 
 
-@app.route("/")
+@app.route("/grants",methods = ['GET'])
 @decorator
-def home():
-    data={"List of users":[{"user1":"Ankhush","User2":"Ganesh"}]}
-    return make_response(jsonify(
-                    message="Valid token and Verified",
-                    data=data),
-                    200
-                )
+def getGrants():
+    with MongoClient(DB_URL) as client:
+        # checkov:skip=CKV_SECRET_4: Skipping checkov warning
+        grants = client.project2.grants
+        cursor= grants.find()
+        output = []
+        for q in cursor:
+            output.append({'org' : q['org'], 'fund' : q['fund'],
+                            'granted_flag' : q['granted_flag'], 'grantee_email' : q['grantee_email']})
+        return make_response(jsonify(
+                        message="Data fethced",
+                        data=output),
+                        200
+                    )
+
+@app.route("/grants",methods = ['POST'])
+@decorator
+def insertGrant():
+    args = request.args
+    org = args.get('org')
+    fund = args.get('fund')
+    post = {'org' : org, 'fund' : fund,
+           'granted_flag' :"N", 'grantee_email' : ""}
+    
+    with MongoClient(DB_URL) as client:
+        grants = client.project2.grants         
+        post_id = str(grants.insert_one(post).inserted_id)
+        return make_response(jsonify(
+                        message="Grant inserted",
+                        data=post_id),
+                        200
+                    )
+
+        
 
