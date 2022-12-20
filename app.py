@@ -58,6 +58,9 @@ def insertGrant():
                         data=post_id),
                         200
                     )
+        
+if __name__ == "__main__":
+    app.run(debug=True)
 
         
 
