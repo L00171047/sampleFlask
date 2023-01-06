@@ -53,6 +53,7 @@ def createUser():
     except Exception as e:
         response=[]
         message="{}".format(e)
+        status=400
     else:
         try:
             DB = boto3.resource('dynamodb')
@@ -69,6 +70,7 @@ def createUser():
         except Exception as e:
             response=[]
             message="{}".format(e)
+            status=400
         else:
             response={
                     'email_id': email_id,
@@ -77,11 +79,12 @@ def createUser():
                     'address':address
                 }
             message="User Created Successfully"
+            status=200
         
     return make_response(jsonify(
                         message=message,
                         data=response),
-                        200
+                        status
                     )
     
 @app.route("/login",methods = ['GET'])
@@ -106,13 +109,15 @@ def login():
     except Exception as e:
         data="{}".format(e)
         message="User login unsuccessful"
+        status=400
     else:
         data=response['AuthenticationResult']  
         message="User login successful"
+        status=200
     return make_response(jsonify(
                         message=message,
                         data=data),
-                        200
+                        status
                     )
 
 @app.route("/grants",methods = ['GET'])
